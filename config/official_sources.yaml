@@ -1,0 +1,147 @@
+jurisdictions:
+  mainland_china:
+    allow_suffixes:
+      - .gov.cn
+      - .edu.cn
+    deny_domains:
+      - baidu.com
+      - weixin.qq.com
+      - sohu.com
+      - 163.com
+      - sina.com.cn
+  hong_kong:
+    allow_suffixes:
+      - .gov.hk
+      - .edu.hk
+    deny_domains:
+      - weixin.qq.com
+      - jobsdb.com
+      - linkedin.com
+  macau:
+    allow_suffixes:
+      - .gov.mo
+      - .edu.mo
+    deny_domains:
+      - weixin.qq.com
+      - linkedin.com
+  singapore:
+    allow_suffixes:
+      - .gov.sg
+      - .edu.sg
+    deny_domains:
+      - linkedin.com
+      - mycareersfuture.gov.sg.external.example
+
+entities:
+  - id: shenzhen
+    type: region
+    display_name: 深圳
+    aliases:
+      - 深圳市
+      - Shenzhen
+    jurisdiction: mainland_china
+    official_domains:
+      - sz.gov.cn
+      - hrss.sz.gov.cn
+      - stic.sz.gov.cn
+    seed_urls:
+      - https://www.sz.gov.cn/
+      - https://hrss.sz.gov.cn/
+      - https://stic.sz.gov.cn/
+    focus_terms:
+      - 高层次人才
+      - 人才认定
+      - 安家补贴
+      - 住房补贴
+      - 博士后
+      - 科研资助
+      - 外籍人才
+      - 工作许可
+
+  - id: hkust
+    type: university
+    display_name: 香港科技大学
+    aliases:
+      - HKUST
+      - 港科大
+      - The Hong Kong University of Science and Technology
+    jurisdiction: hong_kong
+    official_domains:
+      - hkust.edu.hk
+      - ust.hk
+    seed_urls:
+      - https://hkust.edu.hk/
+      - https://hr.hkust.edu.hk/
+    focus_terms:
+      - faculty recruitment
+      - academic appointment
+      - postdoctoral fellow
+      - research support
+      - startup fund
+      - staff benefits
+
+  - id: university_of_macau
+    type: university
+    display_name: 澳门大学
+    aliases:
+      - UM
+      - University of Macau
+      - 澳大
+    jurisdiction: macau
+    official_domains:
+      - um.edu.mo
+    seed_urls:
+      - https://www.um.edu.mo/
+      - https://hr.um.edu.mo/
+    focus_terms:
+      - academic staff
+      - faculty recruitment
+      - postdoctoral fellow
+      - research support
+      - benefits
+
+  - id: singapore
+    type: country_or_jurisdiction
+    display_name: 新加坡
+    aliases:
+      - Singapore
+    jurisdiction: singapore
+    official_domains:
+      - gov.sg
+      - mom.gov.sg
+      - ica.gov.sg
+      - nrf.gov.sg
+      - a-star.edu.sg
+    seed_urls:
+      - https://www.gov.sg/
+      - https://www.mom.gov.sg/
+      - https://www.ica.gov.sg/
+      - https://www.nrf.gov.sg/
+      - https://www.a-star.edu.sg/
+    focus_terms:
+      - Employment Pass
+      - Overseas Networks and Expertise Pass
+      - research fellowship
+      - talent scheme
+      - grant
+      - scholarship
+
+  - id: nus
+    type: university
+    display_name: 新加坡国立大学
+    aliases:
+      - NUS
+      - National University of Singapore
+      - 新加坡国立
+    jurisdiction: singapore
+    official_domains:
+      - nus.edu.sg
+    seed_urls:
+      - https://www.nus.edu.sg/
+      - https://www.nus.edu.sg/careers/
+    focus_terms:
+      - faculty recruitment
+      - academic appointment
+      - postdoctoral fellow
+      - research grant
+      - staff benefits

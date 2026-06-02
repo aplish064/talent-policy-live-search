@@ -1,0 +1,40 @@
+[project]
+name = "talent-policy-live-search"
+version = "0.1.0"
+description = "Stateless real-time official talent policy search"
+requires-python = ">=3.11"
+dependencies = [
+  "beautifulsoup4>=4.12.3",
+  "fastapi>=0.111.0",
+  "feedparser>=6.0.11",
+  "httpx>=0.27.0",
+  "lxml>=5.2.0",
+  "pydantic>=2.7.0",
+  "pydantic-settings>=2.2.1",
+  "pymupdf>=1.24.0",
+  "python-docx>=1.1.0",
+  "python-dotenv>=1.0.1",
+  "pyyaml>=6.0.1",
+  "uvicorn[standard]>=0.30.0"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2.0",
+  "pytest-asyncio>=0.23.0"
+]
+scrape = [
+  "scrapy>=2.16.0",
+  "scrapling>=0.4.7"
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>人才政策实时搜索</title>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body>
+    <main class="page">
+      <section class="search-panel" aria-labelledby="page-title">
+        <div class="title-row">
+          <h1 id="page-title">人才政策实时搜索</h1>
+          <span class="privacy-badge">不保存结果</span>
+        </div>
+        <form id="search-form" class="search-form">
+          <label class="visually-hidden" for="query">地区或学校</label>
+          <input
+            id="query"
+            name="query"
+            type="search"
+            autocomplete="off"
+            maxlength="200"
+            placeholder="输入地区或学校，例如 深圳、HKUST、NUS"
+            required
+          >
+          <button id="submit-button" type="submit">检索</button>
+        </form>
+        <p id="status" class="status">仅检索官方来源，结果不会保存。</p>
+      </section>
+
+      <section id="meta" class="meta-grid" aria-live="polite"></section>
+      <section id="warnings" class="warnings" aria-live="polite"></section>
+      <section id="results" class="results" aria-live="polite"></section>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
