@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from talent_policy_search.config import Settings, get_settings
+from talent_activity_search.config import Settings, get_settings
 
 
 SETTINGS_ENV_KEYS = [

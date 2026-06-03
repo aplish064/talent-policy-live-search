@@ -1166,7 +1166,7 @@ wheels = [
 ]
 
 [[package]]
-name = "talent-policy-live-search"
+name = "talent-activity-live-search"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

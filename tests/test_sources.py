@@ -3,8 +3,8 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from talent_policy_search.models import ApplicationInfo, PolicyCard, SearchRequest
-from talent_policy_search.sources import SourceRegistry
+from talent_activity_search.models import ApplicationInfo, PolicyCard, SearchRequest
+from talent_activity_search.sources import SourceRegistry
 
 
 def test_registry_loads_entities_and_matches_aliases():

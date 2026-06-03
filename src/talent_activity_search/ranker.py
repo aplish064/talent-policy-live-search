@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import date, datetime, timezone
 
-from talent_policy_search.models import PolicyCard
+from talent_activity_search.models import PolicyCard
 
 
 def rank_policies(policies: list[PolicyCard]) -> list[PolicyCard]:

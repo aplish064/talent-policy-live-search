@@ -14,8 +14,8 @@ from urllib.parse import unquote_plus, urlparse, urlunparse
 
 from pydantic import ValidationError
 
-from talent_policy_search.config import Settings, get_settings
-from talent_policy_search.discovery import (
+from talent_activity_search.config import Settings, get_settings
+from talent_activity_search.discovery import (
     detect_get_search_forms,
     extract_feed_links,
     extract_links,
@@ -24,34 +24,34 @@ from talent_policy_search.discovery import (
     parse_sitemap_urls,
     rank_candidate_urls,
 )
-from talent_policy_search.domain_filter import DomainFilter
-from talent_policy_search.extractor import (
+from talent_activity_search.domain_filter import DomainFilter
+from talent_activity_search.extractor import (
     TALENT_POLICY_SIGNALS,
     PageExtraction,
     extract_page_info,
 )
-from talent_policy_search.fetcher import FetchedPage, Fetcher
-from talent_policy_search.llm import LLMClient, LLMUnavailableError
-from talent_policy_search.models import (
+from talent_activity_search.fetcher import FetchedPage, Fetcher
+from talent_activity_search.llm import LLMClient, LLMUnavailableError
+from talent_activity_search.models import (
     OfficialEntity,
     PolicyCard,
     SearchRequest,
     SearchResponse,
     SearchWarning,
 )
-from talent_policy_search.ranker import rank_policies
-from talent_policy_search.sources import SourceRegistry
-from talent_policy_search.web_search import AnySearchProvider, NullWebSearchProvider
+from talent_activity_search.ranker import rank_policies
+from talent_activity_search.sources import SourceRegistry
+from talent_activity_search.web_search import AnySearchProvider, NullWebSearchProvider
 
 
 QUERY_IDENTIFICATION_PROMPT = """
-Identify which official-source registry entities match the user's talent policy search query.
+Identify which official-source registry entities match the user's talent activity query.
 Return only JSON with normalized_query, query_type, matched_entity_ids, and confidence.
 Prefer exact registry entity IDs from the supplied entity list.
 """.strip()
 
 DISCOVERY_TERMS_PROMPT = """
-Generate concise discovery terms for official talent policy pages for one entity.
+Generate concise discovery terms for official talent activity pages for one entity.
 Return only JSON with terms as objects containing term, intent, language, priority,
 and url_path_hints as short URL path keywords.
 """.strip()
@@ -63,23 +63,23 @@ should_extract_fulltext, and confidence. Do not invent facts.
 """.strip()
 
 POLICY_EXTRACTION_PROMPT = """
-Organize already extracted official webpage evidence into structured talent policy cards.
+Organize already extracted official webpage evidence into structured talent activity cards.
 The code has already extracted page title, links, policy list items, dates, attachments,
 application links, and text evidence. Do not perform raw webpage extraction and do not
 invent facts outside the supplied evidence.
 Return only JSON with policies as an array and discard_reason as a short string or null.
-Every policy official_url must be a safe absolute http(s) URL from the supplied evidence.
-Each policy must include title, official_url, source_name, matched_entity, policy_types,
+Every card official_url must be a safe absolute http(s) URL from the supplied evidence.
+Each card must include title, official_url, source_name, matched_entity, policy_types,
 applicable_to, benefits, eligibility, application, dates, evidence_snippets, summary,
 confidence, and completeness. Put published_date/effective_date/deadline/valid_until
 inside dates.
 """.strip()
 
 MARKDOWN_SUMMARY_PROMPT = """
-Organize the supplied official talent policy search results into concise Chinese Markdown.
-Do not invent facts outside the supplied results. Prefer the style of a policy search report:
+Organize the supplied official talent activity search results into concise Chinese Markdown.
+Do not invent facts outside the supplied results. Prefer the style of an activity search report:
 title, category/type, publish date when available, one-sentence summary, source link, and
-notable dimensions such as benefit, applicable population, application entry, or materials.
+notable dimensions such as support, applicable audience, participation path, or materials.
 Return Markdown text only, no JSON and no code fences.
 """.strip()
 
@@ -105,12 +105,15 @@ SOURCE_TYPE_BY_ENTITY_TYPE = {
 }
 GENERIC_PAGE_TITLES = {
     "首页",
+    "网站首页",
+    "学校首页",
     "政务公开",
     "政府信息公开",
-    "政策法规",
-    "政策解读",
+    "活动信息",
+    "活动公告",
     "通知公告",
-    "人才政策",
+    "人才活动",
+    "政策通知",
     "政府公报",
     "人才科",
     "人事科",
@@ -119,52 +122,98 @@ GENERIC_PAGE_TITLES = {
     "综合科",
     "师德师风",
     "人才招聘",
+    "人才招聘会",
+    "活动页面",
+    "活动专区",
+    "活动日历",
+    "活动通知",
     "服务指南",
+    "讲座信息",
     "下载专区",
-    "政策文件",
-    "政策文件库",
+    "活动安排",
+    "活动列表",
+    "活动公告",
     "解读回应",
     "新闻动态",
-    "网站首页",
-    "学校首页",
 }
 POLICY_TITLE_KEYWORDS = (
-    "政策",
+    "活动",
+    "活动页",
+    "活动公告",
+    "活动通知",
+    "活动信息",
+    "活动报名",
+    "活动入口",
+    "讲座",
+    "论坛",
+    "宣讲",
+    "招聘会",
+    "比赛",
+    "大赛",
+    "培训",
+    "研讨",
+    "营",
+    "项目信息",
+    "项目信息发布",
+    "通告",
+    "公告",
     "通知",
     "指南",
-    "办法",
-    "措施",
-    "申报",
+    "方案",
+    "项目",
+    "支持",
     "补贴",
     "津贴",
     "人才",
     "博士后",
     "资助",
     "奖励",
+    "报名",
     "policy",
     "talent",
     "faculty",
     "目录",
+    "activity",
+    "workshop",
+    "seminar",
+    "forum",
     "hiring",
     "recruitment",
+    "event",
     "fellowship",
     "grant",
     "benefit",
+    "benefits",
 )
 TALENT_POLICY_SIGNAL_KEYWORDS = (
     *TALENT_POLICY_SIGNALS,
-    "talent",
-    "recruitment",
-    "faculty",
-    "hiring",
-    "postdoctoral",
-    "postdoc",
-    "postgraduate",
-    "fellowship",
-    "目录",
-    "职称",
-    "资格",
-    "名单",
+    "人才活动",
+    "活动安排",
+    "活动日程",
+    "活动通知",
+    "活动入口",
+    "活动",
+    "讲座",
+    "论坛",
+    "研讨",
+    "宣讲",
+    "营",
+    "赛事",
+    "比赛",
+    "工作坊",
+    "培训",
+    "招聘会",
+    "双创",
+    "招募",
+    "报名",
+    "招募",
+    "招标",
+    "活动日历",
+    "活动通知",
+    "activity",
+    "workshop",
+    "seminar",
+    "forum",
 )
 
 
@@ -1070,39 +1119,39 @@ def _policy_markdown_payload(policy: PolicyCard) -> dict[str, Any]:
 
 
 def _fallback_summary_markdown(query: str, results: list[PolicyCard]) -> str:
-    lines = [f"## {query} 人才政策搜索摘要", ""]
+    lines = [f"## {query} 人才活动搜索摘要", ""]
     if not results:
-        lines.extend(["未找到可汇总的官方政策结果。", ""])
+        lines.extend(["未找到可汇总的官方活动结果。", ""])
         return "\n".join(lines)
 
     lines.extend(
         [
-            f"共找到 {len(results)} 条官方来源结果。以下按相关性、完整度和发布日期排序。",
+            f"共找到 {len(results)} 条官方活动结果。以下按相关性、完整度和发布日期排序。",
             "",
             "### 重点结果",
             "",
         ]
     )
     for index, policy in enumerate(results[:10], start=1):
-        category = " / ".join(policy.policy_types) or "人才政策"
+        category = " / ".join(policy.policy_types) or "人才活动"
         published_date = policy.dates.published_date or "未提取"
         summary = policy.summary or (policy.evidence_snippets[0] if policy.evidence_snippets else "")
         lines.extend(
             [
                 f"{index}. **{_markdown_escape(policy.title)}**",
-                f"   - 类别：{_markdown_escape(category)}",
-                f"   - 发布日期：{_markdown_escape(published_date)}",
+                f"   - 类型：{_markdown_escape(category)}",
+                f"   - 日期：{_markdown_escape(published_date)}",
                 f"   - 摘要：{_markdown_escape(summary) if summary else '暂无摘要，建议查看原文。'}",
                 f"   - 来源：[{_markdown_escape(_display_url(policy.official_url))}]({policy.official_url})",
             ]
         )
         if policy.applicable_to:
-            lines.append(f"   - 适用对象：{_markdown_escape('；'.join(policy.applicable_to))}")
+            lines.append(f"   - 适合对象：{_markdown_escape('；'.join(policy.applicable_to))}")
         benefit_text = _benefit_summary(policy)
         if benefit_text:
-            lines.append(f"   - 待遇/支持：{_markdown_escape(benefit_text)}")
+            lines.append(f"   - 支持内容：{_markdown_escape(benefit_text)}")
         if policy.application.entry_url:
-            lines.append(f"   - 申报入口：{policy.application.entry_url}")
+            lines.append(f"   - 活动入口：{policy.application.entry_url}")
         lines.append("")
     return "\n".join(lines).rstrip()
 
@@ -1229,6 +1278,16 @@ def _infer_policy_types(title: str, evidence: list[str]) -> list[str]:
     haystack = f"{title} {' '.join(evidence)}"
     policy_types: list[str] = []
     keyword_types = [
+        ("讲座", "人才讲座"),
+        ("论坛", "人才论坛"),
+        ("宣讲", "宣讲活动"),
+        ("招聘会", "人才招聘会"),
+        ("比赛", "赛事活动"),
+        ("大赛", "赛事活动"),
+        ("活动", "人才活动"),
+        ("培训", "人才培训"),
+        ("营", "人才营"),
+        ("研修", "人才研修"),
         ("补贴", "人才补贴"),
         ("津贴", "人才津贴"),
         ("安家", "安家补贴"),
@@ -1238,12 +1297,12 @@ def _infer_policy_types(title: str, evidence: list[str]) -> list[str]:
         ("职称", "职称评审"),
         ("个税", "个税补贴"),
         ("所得税", "个税补贴"),
-        ("申报", "申报指南"),
+        ("讲评", "人才讲评会"),
     ]
     for keyword, policy_type in keyword_types:
         if keyword in haystack:
             policy_types.append(policy_type)
-    return _dedupe_strings(policy_types) or ["人才政策"]
+    return _dedupe_strings(policy_types) or ["人才活动"]
 
 
 def _infer_applicable_to(title: str, evidence: list[str]) -> list[str]:
@@ -1254,8 +1313,12 @@ def _infer_applicable_to(title: str, evidence: list[str]) -> list[str]:
         ("境外人才", "境外人才"),
         ("海外人才", "海外人才"),
         ("博士后", "博士后"),
+        ("高校人才", "高校人才"),
         ("毕业生", "毕业生"),
         ("专业技术人才", "专业技术人才"),
+        ("应届", "应届毕业生"),
+        ("青年", "青年人才"),
+        ("企业", "企业人才"),
     ]:
         if keyword in haystack:
             applicable_to.append(label)
@@ -1266,6 +1329,11 @@ def _infer_benefits(title: str, evidence: list[str]) -> list[dict[str, str]]:
     haystack = f"{title} {' '.join(evidence)}"
     benefits: list[dict[str, str]] = []
     for keyword, benefit_type in [
+        ("讲座", "培训支持"),
+        ("论坛", "活动补助"),
+        ("招聘会", "参会支持"),
+        ("宣讲", "宣讲支持"),
+        ("比赛", "赛事补贴"),
         ("补贴", "补贴"),
         ("津贴", "津贴"),
         ("奖励", "奖励"),
@@ -1274,6 +1342,7 @@ def _infer_benefits(title: str, evidence: list[str]) -> list[dict[str, str]]:
         ("住房", "住房支持"),
         ("个税", "个税补贴"),
         ("所得税", "个税补贴"),
+        ("报销", "差旅补贴"),
     ]:
         if keyword in haystack:
             benefits.append(
@@ -1416,6 +1485,8 @@ def _looks_like_policy_title(
         return False
     if title.startswith(("发布日期", "发布时间", "索 引 号", "文 号")):
         return False
+    if "人才活动" in normalized:
+        return True
     if not any(keyword in normalized for keyword in POLICY_TITLE_KEYWORDS):
         return False
     return any(keyword.casefold() in normalized for keyword in TALENT_POLICY_SIGNAL_KEYWORDS)
@@ -1436,12 +1507,14 @@ def _synthetic_entity(query: str, normalized_query: str) -> OfficialEntity:
         focus_terms=_dedupe_strings(
             [
                 name,
-                "人才政策",
+                "人才活动",
+                "人才讲座",
+                "人才论坛",
                 "人才引进",
                 "高层次人才",
-                "人才补贴",
-                "申报指南",
-                "安家补贴",
+                "活动报名",
+                "招聘会",
+                "活动安排",
                 "博士后",
                 "科研资助",
             ]
@@ -1493,17 +1566,17 @@ def _web_search_queries(
         if entity.type == "university":
             queries.extend(
                 [
-                    f"{name} 人才政策 申报 官方",
-                    f"{name} 高层次人才 人才引进 官方",
-                    f"{name} faculty recruitment benefits official",
+                    f"{name} 人才活动 讲座 官方",
+                    f"{name} 人才论坛 招聘会 官方",
+                    f"{name} talent event official",
                 ]
             )
         else:
             queries.extend(
                 [
-                    f"{name} 人才政策 申报 补贴 官方",
-                    f"{name} 高层次人才 人才补贴 政府",
-                    f"{name} 人才引进 博士后 科研资助 官方",
+                    f"{name} 人才活动 报名 政府",
+                    f"{name} 人才讲座 宣讲 会场 官方",
+                    f"{name} 人才论坛 科研 交流 官方",
                 ]
             )
         for term in terms[:2]:

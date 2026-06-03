@@ -22,16 +22,27 @@ DATE_PATTERN = re.compile(r"(?<!\d)(20\d{2})[-年./]\s*(\d{1,2})[-月./]\s*(\d{1
 POLICY_KEYWORDS = (
     "政策",
     "通知",
+    "活动",
+    "讲座",
+    "论坛",
+    "宣讲",
+    "招聘会",
+    "比赛",
+    "大赛",
+    "培训",
+    "研讨",
+    "营",
     "指南",
     "办法",
     "措施",
-    "申报",
     "补贴",
     "津贴",
     "人才",
     "博士后",
     "资助",
     "奖励",
+    "报名",
+    "报名方式",
 )
 POLICY_SIGNALS = (
     "通知",
@@ -40,14 +51,24 @@ POLICY_SIGNALS = (
     "方案",
     "公告",
     "指南",
-    "申报",
+    "报名",
+    "报名方式",
+    "活动",
+    "讲座",
+    "论坛",
+    "宣讲",
+    "招聘会",
+    "比赛",
+    "大赛",
+    "培训",
+    "研讨",
     "补贴",
     "津贴",
     "奖励",
     "认定",
     "入选",
-    "申请",
     "支持",
+    "支持对象",
     "计划",
     "名单",
     "名额",
@@ -60,6 +81,9 @@ TALENT_POLICY_SIGNALS = (
     "引进",
     "高层次",
     "博士后",
+    "目录",
+    "资格",
+    "名单",
     "认定",
     "补贴",
     "资助",
@@ -69,6 +93,16 @@ TALENT_POLICY_SIGNALS = (
     "津贴",
     "落户",
     "职称",
+    "讲座",
+    "论坛",
+    "宣讲",
+    "招聘会",
+    "比赛",
+    "大赛",
+    "培训",
+    "营",
+    "活动",
+    "报名",
 )
 GENERIC_MENU_TITLES = {
     "首页",
@@ -82,28 +116,40 @@ GENERIC_MENU_TITLES = {
     "人才招聘",
     "服务指南",
     "下载专区",
+    "活动日历",
+    "活动指南",
+    "活动信息",
+    "活动公告",
+    "活动栏目",
+    "活动列表",
     "政策文件",
     "政策法规",
     "通知公告",
     "新闻动态",
     "政务公开",
     "综合服务",
+    "活动列表",
     "政策文件库",
     "政策解读",
     "解读回应",
 }
 APPLICATION_KEYWORDS = (
-    "申报入口",
-    "申报系统",
-    "申请入口",
-    "在线申报",
-    "在线申请",
-    "在线办理",
-    "办理入口",
+    "活动入口",
+    "活动报名",
+    "报名入口",
+    "报名通道",
+    "点击报名",
+    "立即报名",
+    "参会报名",
+    "报名方式",
+    "在线报名",
+    "报名系统",
     "入口",
     "apply",
+    "signup",
+    "register",
 )
-ATTACHMENT_KEYWORDS = ("附件", "下载", "材料", "表格", "申请表", "申报表")
+ATTACHMENT_KEYWORDS = ("附件", "下载", "材料", "表格", "报名表", "参赛文件", "材料清单")
 ATTACHMENT_EXTENSIONS = (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".zip", ".rar")
 
 
@@ -356,7 +402,9 @@ def _is_navigation_url(url: str) -> bool:
 def _is_short_navigation_like(title: str, snippet: str | None) -> bool:
     if len(title) < 6:
         return True
-    if len(title) < 10 and not any(keyword in (title + (snippet or "")) for keyword in POLICY_SIGNALS):
+    if len(title) < 10 and not any(
+        keyword in (title + (snippet or "")) for keyword in POLICY_SIGNALS
+    ):
         return True
     return False
 

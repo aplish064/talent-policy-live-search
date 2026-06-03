@@ -7,9 +7,9 @@ from fastapi import Depends, FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from talent_policy_search.models import SearchRequest, SearchResponse
-from talent_policy_search.pipeline import SearchPipeline
-from talent_policy_search.sources import SourceRegistry
+from talent_activity_search.models import SearchRequest, SearchResponse
+from talent_activity_search.pipeline import SearchPipeline
+from talent_activity_search.sources import SourceRegistry
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -17,7 +17,7 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 SOURCE_CONFIG = PROJECT_ROOT / "config" / "official_sources.yaml"
 PACKAGE_PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-app = FastAPI(title="Stateless Talent Policy Search")
+app = FastAPI(title="Talent Activity Live Search")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 

@@ -1,6 +1,6 @@
-# Talent Policy Live Search
+# Talent Activity Live Search
 
-`talent-policy-live-search` 是一个“实时人才政策搜索”服务：
+# `talent-activity-live-search` 是一个“实时人才活动搜索”服务：
 
 - 输入地区/学校关键词后，实时抓取候选页面并整理结果；
 - 不落库、不存历史，不做数据库持久化；
@@ -10,12 +10,12 @@
 
 ## 1. 项目介绍（你在做什么）
 
-这个项目的目标是把“查政策”从“试错式爬站”变成“可复用的检索流程”：
+这个项目的目标是把“查活动”从“试错式爬站”变成“可复用的检索流程”：
 
 - 把用户查询映射到官方实体（省市、大学、机构）；
 - 生成发现词和 URL 路径提示，做官方站点发现和 Web 搜索补充；
 - 并发抓取候选页面并做正文抽取；
-- 用 LLM 做相关性归纳与结构化输出（标题、适用对象、待遇、申报、日期）；
+- 用 LLM 做相关性归纳与结构化输出（标题、适用对象、支持、参与方式、时间）；
 - 返回结果摘要（Markdown）和结构化卡片。
 
 ### 1.1 关键边界
@@ -73,10 +73,10 @@
    - 先用 `httpx` 拉取；
    - 抓取失败时尝试 legacy TLS 重试；
    - 仍失败时进入 `Scrapling` 兜底。
-9. 抓取成功后抽取页面全文和结构信息：标题、正文、链接、政策条目、日期、附件、申报入口。
+9. 抓取成功后抽取页面全文和结构信息：标题、正文、链接、活动条目、时间、附件、参与入口。
 10. 对有效页面做判定与组织：
     - 可继续让 LLM 结构化组织，
-    - 低价值/非政策页面会被过滤。
+    - 低价值/非活动页面会被过滤。
 11. 汇总输出：
     - 按评分去重排序；
     - 返回 `results` + `summary_markdown` + 抓取告警。
@@ -86,8 +86,8 @@
 ## 4. 目录结构
 
 ```text
-talent-policy-live-search/
-├─ src/talent_policy_search/   # 代码（pipeline、抓取、LLM、抽取、路由）
+talent-activity-live-search/
+├─ src/talent_activity_search/   # 代码（pipeline、抓取、LLM、抽取、路由）
 ├─ tests/                      # 测试
 ├─ config/                     # 官方源配置（YAML）
 ├─ .env.example                # 环境变量模板（含默认开启 Scrapling）
@@ -109,8 +109,8 @@ talent-policy-live-search/
 
 ```bash
 cd <你的工作目录>
-git clone <项目仓库地址> talent-policy-live-search
-cd talent-policy-live-search
+git clone <项目仓库地址> talent-activity-live-search
+cd talent-activity-live-search
 
 python3 -m venv .venv
 source .venv/bin/activate
@@ -138,7 +138,7 @@ ENABLE_SCRAPLING_FALLBACK=true
 
 ```bash
 source .venv/bin/activate
-uvicorn talent_policy_search.server:app --reload --host 127.0.0.1 --port 8767
+uvicorn --app-dir src talent_activity_search.server:app --reload --host 127.0.0.1 --port 8767
 ```
 
 访问方式：
@@ -159,7 +159,7 @@ curl -X POST "http://127.0.0.1:8767/api/search" \
 ## 6. 运行前校验
 
 ```bash
-PATH="$PWD/.venv/bin:$PATH" PYTHONDONTWRITEBYTECODE=1 pytest -q
+PYTHONPATH=src uv run pytest -q
 ```
 
 ---
@@ -171,7 +171,7 @@ PATH="$PWD/.venv/bin:$PATH" PYTHONDONTWRITEBYTECODE=1 pytest -q
 - `official_sources_checked`：已检查官方源数量
 - `candidate_pages_seen`：候选页抓取范围内数量
 - `summary_markdown`：LLM 生成的中文摘要
-- `results`：结构化政策条目（标题、适用对象、待遇、申报、日期）
+- `results`：结构化活动条目（标题、适用对象、支持、参与方式、时间）
 - `warnings`：抓取/解析/LLM 相关告警
 
 ---
@@ -180,21 +180,21 @@ PATH="$PWD/.venv/bin:$PATH" PYTHONDONTWRITEBYTECODE=1 pytest -q
 
 ```bash
 source .venv/bin/activate
-uvicorn talent_policy_search.server:app --host 0.0.0.0 --port 8767
+uvicorn --app-dir src talent_activity_search.server:app --host 0.0.0.0 --port 8767
 ```
 
 systemd 示例（`<project_root>` 替换为项目绝对路径）：
 
 ```ini
 [Unit]
-Description=Talent Policy Live Search
+Description=Talent Activity Live Search
 After=network.target
 
 [Service]
 Type=simple
 WorkingDirectory=<project_root>
 EnvironmentFile=<project_root>/.env
-ExecStart=<project_root>/.venv/bin/uvicorn talent_policy_search.server:app --host 0.0.0.0 --port 8767
+ExecStart=<project_root>/.venv/bin/uvicorn --app-dir <project_root>/src talent_activity_search.server:app --host 0.0.0.0 --port 8767
 Restart=on-failure
 RestartSec=3
 User=<运行用户>
@@ -206,7 +206,6 @@ WantedBy=multi-user.target
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now talent-policy-live-search
-sudo systemctl status talent-policy-live-search
+sudo systemctl enable --now talent-activity-live-search
+sudo systemctl status talent-activity-live-search
 ```
-
