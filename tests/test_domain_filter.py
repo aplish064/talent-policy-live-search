@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from talent_activity_search.domain_filter import DomainFilter
-from talent_activity_search.sources import SourceRegistry
+from talent_policy_search.domain_filter import DomainFilter
+from talent_policy_search.sources import SourceRegistry
 
 
 def test_domain_filter_accepts_official_domains_and_suffixes():

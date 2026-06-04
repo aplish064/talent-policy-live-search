@@ -4,8 +4,8 @@ from datetime import datetime, timezone
 
 from fastapi.testclient import TestClient
 
-from talent_activity_search.models import SearchResponse
-from talent_activity_search.server import app, get_pipeline
+from talent_policy_search.models import SearchResponse
+from talent_policy_search.server import app, get_pipeline
 
 
 class FakePipeline:

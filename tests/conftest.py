@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from talent_activity_search.sources import SourceRegistry
+from talent_policy_search.sources import SourceRegistry
 
 
 @pytest.fixture

@@ -1,7 +1,7 @@
 import feedparser.api
 import feedparser.http
 
-from talent_activity_search.discovery import (
+from talent_policy_search.discovery import (
     detect_get_search_forms,
     extract_feed_links,
     extract_links,

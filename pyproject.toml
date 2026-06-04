@@ -1,7 +1,7 @@
 [project]
-name = "talent-activity-live-search"
+name = "talent-policy-live-search"
 version = "0.1.0"
-description = "Stateless real-time official talent activity search"
+description = "Stateless real-time official talent policy search"
 requires-python = ">=3.11"
 dependencies = [
   "beautifulsoup4>=4.12.3",

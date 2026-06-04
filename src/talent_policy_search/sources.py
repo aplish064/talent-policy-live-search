@@ -4,7 +4,7 @@ from pathlib import Path
 
 import yaml
 
-from talent_activity_search.models import OfficialEntity, SourceConfig
+from talent_policy_search.models import OfficialEntity, SourceConfig
 
 
 class SourceRegistry:

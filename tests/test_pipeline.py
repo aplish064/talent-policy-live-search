@@ -5,13 +5,13 @@ from dataclasses import dataclass, field
 
 import pytest
 
-from talent_activity_search.config import Settings
-from talent_activity_search.fetcher import FetchedPage
-from talent_activity_search.models import PolicyCard
-from talent_activity_search import pipeline as pipeline_module
-from talent_activity_search.pipeline import SearchPipeline
-from talent_activity_search.ranker import rank_policies
-from talent_activity_search.web_search import NullWebSearchProvider, WebSearchResult
+from talent_policy_search.config import Settings
+from talent_policy_search.fetcher import FetchedPage
+from talent_policy_search.models import PolicyCard
+from talent_policy_search import pipeline as pipeline_module
+from talent_policy_search.pipeline import SearchPipeline
+from talent_policy_search.ranker import rank_policies
+from talent_policy_search.web_search import NullWebSearchProvider, WebSearchResult
 
 HTML_PARSE_FAILURE_SECRET = "SECRET-DO-NOT-LEAK-" + ("A" * 500)
 NO_WEB_SEARCH = NullWebSearchProvider()
@@ -563,7 +563,7 @@ async def test_pipeline_uses_broad_web_search_when_registry_has_no_match(registr
     assert response.official_sources_checked == 1
     assert any("broad official-domain web search" in warning.message for warning in response.warnings)
     assert web_search.queries
-    assert "广州 人才活动" in web_search.queries[0]
+    assert "广州 人才政策" in web_search.queries[0]
 
 
 @pytest.mark.asyncio
@@ -653,7 +653,7 @@ async def test_pipeline_returns_markdown_summary_when_agent_markdown_fails(regis
 
     response = await pipeline.search("广州")
 
-    assert response.summary_markdown.startswith("## 广州 人才活动搜索摘要")
+    assert response.summary_markdown.startswith("## 广州 人才政策搜索摘要")
     assert "关于做好广州市境外人才财政补贴申报准备工作的通知" in response.summary_markdown
     assert "https://rsj.gz.gov.cn/ywzt/rcgz/renczc/content/post_1.html" in response.summary_markdown
 
@@ -1074,7 +1074,7 @@ async def test_pipeline_degrades_feed_parse_failures_to_warnings(registry, monke
     def fail_feed_parse(feed_text: str):
         raise RuntimeError("feed parser failed with large payload hidden")
 
-    monkeypatch.setattr("talent_activity_search.pipeline.parse_feed_urls", fail_feed_parse)
+    monkeypatch.setattr("talent_policy_search.pipeline.parse_feed_urls", fail_feed_parse)
     pipeline = SearchPipeline(
         registry=registry,
         llm=FakeLLM(),

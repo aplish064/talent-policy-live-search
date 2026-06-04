@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from urllib.parse import urlparse
 
-from talent_activity_search.models import OfficialEntity
-from talent_activity_search.sources import SourceRegistry
+from talent_policy_search.models import OfficialEntity
+from talent_policy_search.sources import SourceRegistry
 
 
 _HOST_LABEL_CHARS = set("abcdefghijklmnopqrstuvwxyz0123456789-")

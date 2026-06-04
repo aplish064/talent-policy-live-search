@@ -5,9 +5,9 @@ import httpx
 import pytest
 from docx import Document
 
-from talent_activity_search.config import Settings
-from talent_activity_search.extractor import extract_fulltext, extract_page_info
-from talent_activity_search.fetcher import FetchedPage, Fetcher, FetchTooLargeError
+from talent_policy_search.config import Settings
+from talent_policy_search.extractor import extract_fulltext, extract_page_info
+from talent_policy_search.fetcher import FetchedPage, Fetcher, FetchTooLargeError
 
 
 class ChunkedAsyncStream(httpx.AsyncByteStream):
@@ -238,7 +238,7 @@ def test_extract_pdf_stops_reading_pages_after_max_chars(monkeypatch):
         assert filetype == "pdf"
         return FakeDocument()
 
-    monkeypatch.setattr("talent_activity_search.extractor.fitz.open", fake_open)
+    monkeypatch.setattr("talent_policy_search.extractor.fitz.open", fake_open)
 
     text = extract_fulltext(b"pdf bytes", "application/pdf", max_chars=10)
 
@@ -294,7 +294,7 @@ def test_extract_docx_stops_reading_paragraphs_after_max_chars(monkeypatch):
         assert content.getvalue() == b"docx bytes"
         return FakeDocument()
 
-    monkeypatch.setattr("talent_activity_search.extractor.Document", fake_document)
+    monkeypatch.setattr("talent_policy_search.extractor.Document", fake_document)
 
     text = extract_fulltext(
         b"docx bytes",
@@ -330,7 +330,7 @@ class FakeScraplingFetcher:
 async def test_fetcher_sends_retrieval_headers_and_returns_page_content():
     async def handler(request: httpx.Request) -> httpx.Response:
         assert request.headers["user-agent"] == (
-            "TalentActivityLiveSearch/0.1 (+official-source-retrieval)"
+            "TalentPolicyLiveSearch/0.1 (+official-source-retrieval)"
         )
         assert request.headers["accept"] == (
             "text/html,application/xhtml+xml,application/pdf,text/plain,*/*;q=0.8"

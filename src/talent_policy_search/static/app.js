@@ -11,7 +11,7 @@ form.addEventListener("submit", async (event) => {
   const query = queryInput.value.trim();
 
   if (!query) {
-    setStatus("请输入地区或单位。", "error");
+    setStatus("请输入地区或学校。", "error");
     queryInput.focus();
     return;
   }
@@ -180,7 +180,7 @@ function renderPolicy(policy) {
   link.href = textValue(policy.official_url) || "#";
   link.target = "_blank";
   link.rel = "noreferrer";
-  link.textContent = textValue(policy.title) || "未命名活动";
+  link.textContent = textValue(policy.title) || "未命名政策";
   title.append(link);
 
   const quality = document.createElement("div");
@@ -212,7 +212,7 @@ function renderPolicy(policy) {
 function summaryBlock(policy) {
   const block = document.createElement("section");
   block.className = "summary";
-  block.append(sectionTitle("活动摘要"), paragraph(textValue(policy.summary) || "未提供摘要。"));
+  block.append(sectionTitle("摘要"), paragraph(textValue(policy.summary) || "未提供摘要。"));
   return block;
 }
 
@@ -220,7 +220,7 @@ function detailGrid(policy) {
   const grid = document.createElement("section");
   grid.className = "detail-grid";
   grid.append(
-    detailGroup("适合对象", arrayValue(policy.applicable_to).join("；") || "未提取"),
+    detailGroup("适用对象", arrayValue(policy.applicable_to).join("；") || "未提取"),
     benefitsGroup(policy),
     eligibilityGroup(policy),
     applicationGroup(policy.application || {}),
@@ -232,10 +232,10 @@ function detailGrid(policy) {
 function benefitsGroup(policy) {
   const benefits = arrayValue(policy.benefits);
   if (benefits.length === 0) {
-    return detailGroup("支持", "未提取");
+    return detailGroup("待遇", "未提取");
   }
   return richGroup(
-    "支持",
+    "待遇",
     benefits.map((benefit) => {
       const parts = [
         textValue(benefit.type),
@@ -243,7 +243,7 @@ function benefitsGroup(policy) {
         textValue(benefit.currency),
       ].filter(Boolean);
       return {
-        main: parts.join(" · ") || "未命名支持",
+        main: parts.join(" · ") || "未命名待遇",
         sub: textValue(benefit.evidence),
       };
     }),
@@ -253,10 +253,10 @@ function benefitsGroup(policy) {
 function eligibilityGroup(policy) {
   const items = arrayValue(policy.eligibility);
   if (items.length === 0) {
-    return detailGroup("参与条件", "未提取");
+    return detailGroup("申报条件", "未提取");
   }
   return richGroup(
-    "参与条件",
+    "申报条件",
     items.map((item) => ({
       main: textValue(item.condition) || "未命名条件",
       sub: textValue(item.evidence),
@@ -274,38 +274,38 @@ function applicationGroup(application) {
     link.href = entryUrl;
     link.target = "_blank";
     link.rel = "noreferrer";
-    link.textContent = "活动入口";
+    link.textContent = "申请入口";
     lines.push(link);
   }
   if (materials.length > 0) {
-    lines.push(textNode(`报名材料：${materials.join("；")}`));
+    lines.push(textNode(`材料：${materials.join("；")}`));
   }
   if (application.process) {
     lines.push(textNode(`流程：${textValue(application.process)}`));
   }
   if (application.evidence) {
-    lines.push(textNode(`说明：${textValue(application.evidence)}`));
+    lines.push(textNode(`依据：${textValue(application.evidence)}`));
   }
 
-  return mixedGroup("参与", lines.length > 0 ? lines : [textNode("未提取")]);
+  return mixedGroup("申请", lines.length > 0 ? lines : [textNode("未提取")]);
 }
 
 function datesGroup(dates) {
   const entries = [
     ["发布日期", dates.published_date],
-    ["活动日期", dates.effective_date],
-    ["报名截止", dates.deadline],
+    ["生效日期", dates.effective_date],
+    ["截止日期", dates.deadline],
     ["有效期至", dates.valid_until],
   ]
     .map(([label, value]) => [label, textValue(value)])
     .filter(([, value]) => value);
 
   if (entries.length === 0) {
-    return detailGroup("时间", "未提取");
+    return detailGroup("日期", "未提取");
   }
 
   return richGroup(
-    "时间",
+    "日期",
     entries.map(([label, value]) => ({main: `${label}：${value}`})),
   );
 }
@@ -314,7 +314,7 @@ function evidenceList(policy) {
   const snippets = arrayValue(policy.evidence_snippets);
   const block = document.createElement("section");
   block.className = "evidence-block";
-  block.append(sectionTitle("来源片段"));
+  block.append(sectionTitle("证据片段"));
 
   if (snippets.length === 0) {
     block.append(paragraph("未提取。"));
@@ -430,7 +430,7 @@ function paragraph(text) {
 function emptyResult() {
   const item = document.createElement("article");
   item.className = "empty";
-  item.textContent = "未返回匹配活动。";
+  item.textContent = "未返回匹配政策。";
   return item;
 }
 

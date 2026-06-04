@@ -6,7 +6,7 @@ from typing import Any
 
 import httpx
 
-from talent_activity_search.config import Settings, get_settings
+from talent_policy_search.config import Settings, get_settings
 
 
 class LLMUnavailableError(RuntimeError):

@@ -4,8 +4,8 @@ import traceback
 import httpx
 import pytest
 
-from talent_activity_search.config import Settings
-from talent_activity_search.llm import (
+from talent_policy_search.config import Settings
+from talent_policy_search.llm import (
     LLMClient,
     LLMUnavailableError,
     parse_json_object,

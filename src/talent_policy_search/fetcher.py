@@ -7,11 +7,11 @@ from urllib.parse import urljoin
 
 import httpx
 
-from talent_activity_search.config import Settings, get_settings
+from talent_policy_search.config import Settings, get_settings
 
 
 ACCEPT_HEADER = "text/html,application/xhtml+xml,application/pdf,text/plain,*/*;q=0.8"
-USER_AGENT = "TalentActivityLiveSearch/0.1 (+official-source-retrieval)"
+USER_AGENT = "TalentPolicyLiveSearch/0.1 (+official-source-retrieval)"
 REDIRECT_STATUS_CODES = {301, 302, 303, 307, 308}
 MAX_REDIRECTS = 20
 _TLS_HANDSHAKE_ERROR_MARKERS = (
@@ -53,11 +53,7 @@ class Fetcher:
         self._settings = settings or get_settings()
         self._transport = transport
         self._scrapling_fetcher = scrapling_fetcher
-        if (
-            self._scrapling_fetcher is None
-            and self._settings.enable_scrapling_fallback
-            and self._transport is None
-        ):
+        if self._scrapling_fetcher is None and self._settings.enable_scrapling_fallback:
             self._scrapling_fetcher = _make_scrapling_fetcher(self._settings)
 
     async def fetch(
